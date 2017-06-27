@@ -42,7 +42,7 @@ void CGameStateInit::OnInit() {
     exitGameCount = 0;
     cheatCode = "";
 
-    if (0) {// DEBUG用
+    if (0) { // DEBUG用
         displayState = 1;
         noteDisplayState = 6;
         statsDisplayState = 0;
@@ -296,10 +296,34 @@ void CGameStateInit::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {
     }
 }
 
-void CGameStateInit::OnLButtonDown(UINT nFlags, CPoint point) {
-    wrongKeyNum++;
+
+bool HitRectangle(int x, int y, int tx1, int tx2, int ty1, int ty2) {
+    if (x >= tx1 && x <= tx2 && y >= ty1 && y <= ty2)return 1;
+    else return 0;
 }
-void CGameStateInit::OnMouseMove(UINT nFlags, CPoint point) {}
+void CGameStateInit::OnMouseMove(UINT nFlags, CPoint point) {
+    if (displayState == 0) {
+        for (int i = 0; i < 5; i++) {
+            if (HitRectangle(point.x, point.y, \
+                             menuText.at(i)->Left(), menuText.at(i)->Left() + menuText.at(i)->Width(), \
+                             menuText.at(i)->Top(), menuText.at(i)->Top() + menuText.at(i)->Height()) ) {
+                currSelectItem = i;
+            }
+        }
+    }
+}
+void CGameStateInit::OnLButtonDown(UINT nFlags, CPoint point) {
+    if (displayState == 0) {
+        for (int i = 0; i < 5; i++) {
+            if (HitRectangle(point.x, point.y, \
+                             menuText.at(i)->Left(), menuText.at(i)->Left() + menuText.at(i)->Width(), \
+                             menuText.at(i)->Top(), menuText.at(i)->Top() + menuText.at(i)->Height())) {
+                OnKeyUp(0xD, 0, 0); // 發送按下ENTER鍵
+            }
+        }
+    }
+}
+
 void CGameStateInit::OnMove() {
     map.OnMove();
     noteExkey.OnMove();
@@ -736,7 +760,7 @@ void CGameStateOver::OnBeginState() {
     PublicData::file.ReadRecordFile();									// 讀 遊玩記錄
 
     //
-    if (PublicData::me.JudgeUnlock(PublicData::totalKeyCount, score, int(accuracy), level)) {// 判斷是否達成解鎖要素
+    if (PublicData::me.JudgeUnlock(PublicData::totalKeyCount, score, int(accuracy), level)) { // 判斷是否達成解鎖要素
         isUnlock = PublicData::newUnlock = true;
     }
 
@@ -1173,7 +1197,7 @@ void CGameStateRun::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) {
 
         if (nChar >= 65 && nChar <= 90) totalKeyDownCount++;			// 總按鍵數++
 
-        if (nChar == 13) {// 若按下ENTER則發動EMP攻擊.
+        if (nChar == 13) { // 若按下ENTER則發動EMP攻擊.
             emp.CallEmp(PublicData::musicOnOff);
         }
     }
